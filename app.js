@@ -1338,8 +1338,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Creamos un nuevo manejador que capture el código escaneado actual
             const newConfirmScanHandler = async () => {
                 this.closeModal(this.elements.scanConfirmationModal);
-                // El escáner ya fue detenido en handleQuaggaDetection. Debe permanecer detenido aquí.
-                await checkPalletId(scannedCode, true); // Pasar `true` para indicar que viene de escaneo
+                // El escáner ya fue detenido en handleQuaggaDetection (solo Quagga.stop()).
+                // Ahora, llamamos a checkPalletId para la búsqueda.
+                await checkPalletId(scannedCode, true); 
+                
+                // Después de que checkPalletId termine (y muestre el resultado),
+                // detenemos completamente el escáner (incluida la cámara) para que el usuario
+                // pueda revisar la información sin que la cámara siga activa.
+                stopScanner(); // <-- AGREGAR ESTA LÍNEA
+
                 lastScannedIdForTick = null; // Resetear para permitir escanear el mismo código más tarde
             };
 
@@ -1615,7 +1622,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Event listeners para botones de recuperación
             const recoverBtn = document.getElementById('recoverSessionButton');
-            const discardBtn = document.getElementById('discardSessionButton');
+            const discardBtn = document.getElementById('recoverSessionButton'); // Corregido: debería ser 'discardSessionButton'
             
             if (recoverBtn) {
                 recoverBtn.addEventListener('click', () => {
@@ -1832,8 +1839,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             };
-        } catch (error) {
-            Logger.error('Error ajustando layout del escáner', error);
+        }
+        catch (error) { // AGREGADO: Catch block para onloadedmetadata
+            Logger.error('Error ajustando layout del escáner en onloadedmetadata', error);
         }
     }
 
@@ -2296,9 +2304,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // MODIFICADO: Tecla ESC global para manejar modales y escáner
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                // Si el modal de confirmación de escaneo está abierto, ciérralo y reanuda el escáner
+                // Priorizar el cierre del modal de confirmación de escaneo
                 if (PalletManager.elements.scanConfirmationModal && PalletManager.elements.scanConfirmationModal.classList.contains('show')) {
                     PalletManager.closeModal(PalletManager.elements.scanConfirmationModal);
+                    // Si el escáner estaba activo y cerramos el modal con ESC, debemos reanudarlo para que el usuario pueda intentar escanear de nuevo.
+                    // Esto simula la acción de "Re-escanear" si el usuario solo quería cerrar el modal.
                     if (scanning && quaggaScanner) {
                         Quagga.start(); // Reanudar Quagga
                         displayResult('Escáner reanudado. Listo para escanear...', false);
