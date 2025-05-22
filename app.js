@@ -1339,7 +1339,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newConfirmScanHandler = async () => {
                 this.closeModal(this.elements.scanConfirmationModal);
                 // El escáner ya fue detenido en handleQuaggaDetection (solo Quagga.stop()).
-                // Ahora, llamamos a checkPalletId para la búsqueda.
+                // Ahora, perform the data lookup.
                 await checkPalletId(scannedCode, true); 
                 
                 // Después de que checkPalletId termine (y muestre el resultado),
@@ -1533,7 +1533,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let statusTextDisplay = 'NO ENCONTRADO (SISTEMA)';
 
             if (palletInfo.found) {
-                statusColorClass = `status-${(palletInfo.statusSummary || 'mixto').toLowerCase().replace(/\s+/g, '-')}`;
+                statusClass = `status-${(palletInfo.statusSummary || 'mixto').toLowerCase().replace(/\s+/g, '-')}`;
                 statusTextDisplay = (palletInfo.statusSummary || 'Mixto').toUpperCase();
             }
             
@@ -1554,7 +1554,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn-icon edit-pallet-btn" title="Editar pallet" onclick="PalletManager.showEditPalletModal('${palletInfo.id}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                <path d="M18.5 2.5a2.121 2 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                             </svg>
                         </button>
                         <button class="btn-icon delete-pallet-btn" title="Eliminar pallet" onclick="removePalletFromSession(${index})">
@@ -1622,7 +1622,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Event listeners para botones de recuperación
             const recoverBtn = document.getElementById('recoverSessionButton');
-            const discardBtn = document.getElementById('recoverSessionButton'); // Corregido: debería ser 'discardSessionButton'
+            const discardBtn = document.getElementById('discardSessionButton'); // CORREGIDO: id del botón
             
             if (recoverBtn) {
                 recoverBtn.addEventListener('click', () => {
@@ -1703,7 +1703,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (existingErrorIndex === -1) {
                     scannedPalletsSessionData.push(palletInfoError);
-                    PersistenceManager.saveSessionData(scannedPalletsSessionData);
+                    PersistenceManager.saveSessionData(scalledPalletsSessionData);
                 }
             } else {
                 if (!dataFromServer.found) {
